@@ -1,0 +1,35 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "marklogic-mcp"
+version = "0.1.0"
+description = "A Python-based MCP server for MarkLogic database operations"
+authors = [
+    {name = "Your Name", email = "your.email@example.com"}
+]
+requires-python = ">=3.7"
+dependencies = [
+    "marklogic-python-client>=1.0.0",
+    "fastmcp>=0.1.0",
+    "toml>=0.10.2",
+    "requests>=2.31.0"
+]
+
+[project.urls]
+Homepage = "https://github.com/yourusername/marklogic-mcp"
+Repository = "https://github.com/yourusername/marklogic-mcp.git"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.marklogic]
+host = "localhost"
+port = 8000
+user = "admin"
+password = "admin"
+
+[tool.marklogic.logging]
+level = "INFO"
+format = "%(asctime)s - %(name)s - %(levelname)s - %(message)s" 
