@@ -21,11 +21,11 @@ wheels/
 *.egg
 
 # Virtual Environment
-venv/
-env/
-ENV/
 .env
 .venv
+env/
+venv/
+ENV/
 env.bak/
 venv.bak/
 
@@ -34,30 +34,25 @@ venv.bak/
 .vscode/
 *.swp
 *.swo
-.project
-.pydevproject
-.settings/
-*.sublime-workspace
-*.sublime-project
+.DS_Store
 
 # Testing
-.tox/
-.coverage
-.coverage.*
-.cache
-nosetests.xml
-coverage.xml
-*.cover
-.hypothesis/
 .pytest_cache/
+.coverage
 htmlcov/
+.tox/
+.nox/
 
-# Distribution / packaging
-.Python
-*.manifest
-*.spec
-pip-log.txt
-pip-delete-this-directory.txt
+# MarkLogic specific
+marklogic.log
+*.xqlog
+
+# Project specific
+uv.lock
+.uv/
+.python-version
+.env.*
+!.env.example
 
 # Logs
 *.log
@@ -72,7 +67,6 @@ db.sqlite3-journal
 *.env
 
 # Operating System
-.DS_Store
 .DS_Store?
 ._*
 .Spotlight-V100
