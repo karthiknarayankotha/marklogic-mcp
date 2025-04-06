@@ -1,3 +1,4 @@
+python-marklogic>=1.0.0
 fastmcp>=0.1.0
-marklogic-python-client>=1.0.0
-typing-extensions>=4.0.0 
+toml>=0.10.2
+python-dotenv>=1.0.0 

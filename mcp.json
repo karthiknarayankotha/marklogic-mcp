@@ -1,0 +1,14 @@
+{
+  "servers": {
+    "marklogic": {
+      "command": "uvicorn marklogic_mcp.server:mcp --reload --port 6277",
+      "env": {
+        "PYTHONPATH": "${workspaceRoot}/src",
+        "MCP_PORT": "6277"
+      },
+      "cwd": "${workspaceRoot}",
+      "python": "${workspaceRoot}/venv/bin/python"
+    }
+  },
+  "default": "marklogic"
+}

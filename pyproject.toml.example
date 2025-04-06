@@ -1,0 +1,9 @@
+[tool.marklogic]
+host = "localhost"
+port = 8000
+user = "admin"
+password = "admin"
+
+[tool.marklogic.logging]
+level = "INFO"
+format = "%(asctime)s - %(name)s - %(levelname)s - %(message)s" 
