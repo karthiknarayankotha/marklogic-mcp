@@ -2,7 +2,9 @@
 
 This is a Model Context Protocol (MCP) server implementation for MarkLogic, allowing you to interact with a MarkLogic database through MCP tools.
 
-## Features
+2. The server provides the following operations:
+
+### Create Document
 
 - Create documents in MarkLogic with optional collections
 - Read documents by URI
@@ -22,8 +24,8 @@ The server requires the following environment variables:
 ```bash
 MARKLOGIC_HOST=localhost
 MARKLOGIC_PORT=8000
-MARKLOGIC_USERNAME=python-user
-MARKLOGIC_PASSWORD=pyth0n
+MARKLOGIC_USERNAME=admin
+MARKLOGIC_PASSWORD=admin
 ```
 
 ## Usage
