@@ -37,7 +37,13 @@ dependencies = [
 Homepage = "https://github.com/karthiknarayankotha/marklogic-mcp"
 Repository = "https://github.com/karthiknarayankotha/marklogic-mcp.git"
 Documentation = "https://github.com/karthiknarayankotha/marklogic-mcp#readme"
-"Bug Tracker" = "https://github.com/karthiknarayankotha/marklogic-mcp/issues"
+"Bug Tracker" = "https://github.com/yourusername/marklogic-mcp/issues"
+
+[project.entry-points."uvx.commands"]
+marklogic-mcp = "marklogic_mcp.server:cli"
+
+[project.scripts]
+marklogic-mcp = "marklogic_mcp.server:cli"
 
 [tool.setuptools]
 package-dir = {"" = "src"}
