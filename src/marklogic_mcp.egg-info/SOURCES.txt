@@ -1,9 +1,0 @@
-README.md
-pyproject.toml
-src/marklogic_mcp/__init__.py
-src/marklogic_mcp/server.py
-src/marklogic_mcp.egg-info/PKG-INFO
-src/marklogic_mcp.egg-info/SOURCES.txt
-src/marklogic_mcp.egg-info/dependency_links.txt
-src/marklogic_mcp.egg-info/requires.txt
-src/marklogic_mcp.egg-info/top_level.txt

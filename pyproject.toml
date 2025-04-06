@@ -1,35 +1,17 @@
-[build-system]
-requires = ["setuptools>=61.0"]
-build-backend = "setuptools.build_meta"
-
 [project]
-name = "marklogic-mcp"
+name = "mcp-marklogic"
 version = "0.1.0"
-description = "A Python-based MCP server for MarkLogic database operations"
-authors = [
-    {name = "Your Name", email = "your.email@example.com"}
-]
-requires-python = ">=3.7"
-dependencies = [
-    "marklogic-python-client>=1.0.0",
-    "fastmcp>=0.1.0",
-    "toml>=0.10.2",
-    "requests>=2.31.0"
-]
+description = "A MarkLogic MCP server"
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = ["mcp>=1.6.0", "marklogic-python-client>=1.2.0"]
 
-[project.urls]
-Homepage = "https://github.com/yourusername/marklogic-mcp"
-Repository = "https://github.com/yourusername/marklogic-mcp.git"
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
-[tool.setuptools]
-package-dir = {"" = "src"}
+[tool.uv]
+dev-dependencies = ["pyright>=1.1.389", "pytest>=7.0.0", "pytest-asyncio>=0.20.3"]
 
-[tool.marklogic]
-host = "localhost"
-port = 8000
-user = "admin"
-password = "admin"
-
-[tool.marklogic.logging]
-level = "INFO"
-format = "%(asctime)s - %(name)s - %(levelname)s - %(message)s" 
+[project.scripts]
+mcp-marklogic = "mcp_marklogic:main"
