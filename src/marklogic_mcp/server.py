@@ -5,7 +5,6 @@ import toml
 import json
 from pathlib import Path
 from typing import Optional, List, Dict, Any
-import typer
 
 def load_config():
     """Load configuration from pyproject.toml"""
@@ -187,18 +186,6 @@ async def get_database_info() -> Dict[str, Any]:
     except Exception as e:
         logger.error(f"Error fetching database info: {str(e)}")
         return {"status": "error", "message": str(e)}
-
-app = typer.Typer()
-
-@app.command()
-def start():
-    """Start the MarkLogic MCP server"""
-    logger.info("Starting MarkLogic MCP server via CLI...")
-    mcp.run(transport="stdio")
-
-def cli():
-    """Entry point for the uvx marklogic-mcp command"""
-    app()
 
 if __name__ == "__main__":
     # Initialize and run the server

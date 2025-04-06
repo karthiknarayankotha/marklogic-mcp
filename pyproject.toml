@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "marklogic-mcp"
-version = "0.1.0"
+version = "0.1.0.dev3"
 description = "A Python-based MCP server for MarkLogic database operations"
 readme = "README.md"
 authors = [
@@ -29,21 +29,12 @@ dependencies = [
     "marklogic-python-client>=1.0.0",
     "fastmcp>=0.1.0",
     "toml>=0.10.2",
-    "requests>=2.31.0",
-    "uvicorn>=0.25.0"
+    "requests>=2.31.0"
 ]
 
 [project.urls]
 Homepage = "https://github.com/karthiknarayankotha/marklogic-mcp"
 Repository = "https://github.com/karthiknarayankotha/marklogic-mcp.git"
-Documentation = "https://github.com/karthiknarayankotha/marklogic-mcp#readme"
-"Bug Tracker" = "https://github.com/yourusername/marklogic-mcp/issues"
-
-[project.entry-points."uvx.commands"]
-marklogic-mcp = "marklogic_mcp.server:cli"
-
-[project.scripts]
-marklogic-mcp = "marklogic_mcp.server:cli"
 
 [tool.setuptools]
 package-dir = {"" = "src"}

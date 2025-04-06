@@ -24,7 +24,7 @@ A Python-based MCP (Model-Controller-Processor) server for MarkLogic database op
 1. Clone the repository:
 
 ```bash
-git clone https://github.com/yourusername/marklogic-mcp.git
+git clone https://github.com/karthiknarayankotha/marklogic-mcp.git
 cd marklogic-mcp
 ```
 
