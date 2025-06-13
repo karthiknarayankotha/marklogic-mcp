@@ -1,202 +1,160 @@
-from marklogic import Client
-import logging
-from mcp.server.models import InitializationOptions
-import mcp.types as types
-from mcp.server import NotificationOptions, Server
-import mcp.server.stdio
-from typing import Any, Optional
 import json
+import logging
+from typing import Dict, List, Optional, Union
+from marklogic import Client
+from mcp.server.fastmcp import FastMCP
 
-logger = logging.getLogger('mcp_marklogic')
-logger.info("Starting MCP MarkLogic Server")
+logging.basicConfig(level=logging.INFO)
 
-class MarkLogicDatabase:
-    def __init__(self, host: str, port: int, username: str, password: str):
-        """Initialize connection to the MarkLogic database"""
-        logger.debug(f"Initializing database connection to {host}:{port}")
-        self.client = Client(f"http://{host}:{port}", digest=(username, password))
+mcp = FastMCP("MarkLogic Explorer")
 
-    def create_document(self, uri: str, content: Any, collections: Optional[list[str]] = None) -> dict:
-        """Create a document in MarkLogic"""
-        try:
-            response = self.client.documents.write(uri=uri, content=content, collections=collections)
-            logger.debug(f"Created document at {uri}")
-            return {"status": "success", "uri": uri}
-        except Exception as e:
-            logger.error(f"Error creating document: {e}")
-            raise
+# Initialize MarkLogic connection
+# Note: These should be configured via environment variables in production
+ML_HOST = "http://localhost"
+ML_PORT = 8000
+ML_USER = "admin"
+ML_PASSWORD = "admin"
 
-    def read_document(self, uri: str) -> Any:
-        """Read a document from MarkLogic"""
-        try:
-            response = self.client.get(f"/v1/documents?uri={uri}")
-            if response.status_code == 200:
-                return response.json()
-            else:
-                raise Exception(f"Failed to read document: {response.text}")
-        except Exception as e:
-            logger.error(f"Error reading document: {e}")
-            raise
+def get_client():
+    """Get MarkLogic client connection using the official Python Client"""
+    return Client(
+        f"{ML_HOST}:{ML_PORT}",
+        digest=(ML_USER, ML_PASSWORD)
+    )
 
-    def delete_document(self, uri: str) -> dict:
-        """Delete a document from MarkLogic"""
-        try:
-            response = self.client.delete(f"/v1/documents?uri={uri}")
-            if response.status_code == 204:
-                return {"status": "success", "uri": uri}
-            else:
-                raise Exception(f"Failed to delete document: {response.text}")
-        except Exception as e:
-            logger.error(f"Error deleting document: {e}")
-            raise
+@mcp.resource("collections://main")
+def get_collections() -> List[str]:
+    """Get all collections in the database"""
+    client = get_client()
+    try:
+        response = client.get("/v1/search", params={"category": "collection"})
+        collections = response.json().get("collections", [])
+        return collections
+    except Exception as e:
+        return [f"Error: {str(e)}"]
 
-    def search_documents(self, query: str, collections: Optional[list[str]] = None) -> list[dict]:
-        """Search documents in MarkLogic"""
-        try:
-            params = {"q": query}
-            if collections:
-                params["collection"] = collections
-            response = self.client.get("/v1/search", params=params)
-            if response.status_code == 200:
-                return response.json()["results"]
-            else:
-                raise Exception(f"Failed to search documents: {response.text}")
-        except Exception as e:
-            logger.error(f"Error searching documents: {e}")
-            raise
-
-async def main(marklogic_host: str, marklogic_port: int, marklogic_username: str, marklogic_password: str):
-    logger.info(f"Connecting to MarkLogic MCP Server at {marklogic_host}:{marklogic_port}")
-
-    db = MarkLogicDatabase(marklogic_host, marklogic_port, marklogic_username, marklogic_password)
-    server = Server("marklogic-manager")
-
-    # Register handlers
-    logger.debug("Registering handlers")
-
-    @server.list_tools()
-    async def handle_list_tools() -> list[types.Tool]:
-        """List available tools"""
-        return [
-            types.Tool(
-                name="create-document",
-                description="Create a document in MarkLogic",
-                annotations={
-                    "destructiveHint": True,
-                    "idempotentHint": False,
-                    "readOnlyHint": False,
-                    "title": "Create Document"
-                },
-                inputSchema={
-                    "type": "object",
-                    "properties": {
-                        "uri": {"type": "string", "description": "URI for the document"},
-                        "content": {"type": "object", "description": "Document content"},
-                        "collections": {"type": "array", "items": {"type": "string"}, "description": "Collections to add the document to"}
-                    },
-                    "required": ["uri", "content"],
-                },
-            ),
-            types.Tool(
-                name="read-document",
-                description="Read a document from MarkLogic",
-                annotations={
-                    "destructiveHint": False,
-                    "idempotentHint": True,
-                    "readOnlyHint": True,
-                    "title": "Read Document"
-                },
-                inputSchema={
-                    "type": "object",
-                    "properties": {
-                        "uri": {"type": "string", "description": "URI of the document to read"},
-                    },
-                    "required": ["uri"],
-                },
-            ),
-            types.Tool(
-                name="delete-document",
-                description="Delete a document from MarkLogic",
-                annotations={
-                    "destructiveHint": True,
-                    "idempotentHint": True,
-                    "readOnlyHint": False,
-                    "title": "Delete Document"
-                },
-                inputSchema={
-                    "type": "object",
-                    "properties": {
-                        "uri": {"type": "string", "description": "URI of the document to delete"},
-                    },
-                    "required": ["uri"],
-                },
-            ),
-            types.Tool(
-                name="search-documents",
-                description="Search documents in MarkLogic",
-                annotations={
-                    "destructiveHint": False,
-                    "idempotentHint": True,
-                    "readOnlyHint": True,
-                    "title": "Search Documents"
-                },
-                inputSchema={
-                    "type": "object",
-                    "properties": {
-                        "query": {"type": "string", "description": "Search query string"},
-                        "collections": {"type": "array", "items": {"type": "string"}, "description": "Collections to search in"}
-                    },
-                    "required": ["query"],
-                },
-            ),
-        ]
-
-    @server.call_tool()
-    async def handle_call_tool(
-        name: str, arguments: dict[str, Any] | None
-    ) -> list[types.TextContent | types.ImageContent | types.EmbeddedResource]:
-        """Handle tool execution requests"""
-        try:
-            if name == "create-document":
-                result = db.create_document(
-                    uri=arguments["uri"],
-                    content=arguments["content"],
-                    collections=arguments.get("collections")
-                )
-                return [types.TextContent(type="text", text=json.dumps(result))]
-
-            elif name == "read-document":
-                result = db.read_document(arguments["uri"])
-                return [types.TextContent(type="text", text=json.dumps(result))]
-
-            elif name == "delete-document":
-                result = db.delete_document(arguments["uri"])
-                return [types.TextContent(type="text", text=json.dumps(result))]
-
-            elif name == "search-documents":
-                results = db.search_documents(
-                    query=arguments["query"],
-                    collections=arguments.get("collections")
-                )
-                return [types.TextContent(type="text", text=json.dumps(results))]
+@mcp.tool()
+def create_document(uri: str, content, collection: Optional[str] = None) -> str:
+    """Create a new document in MarkLogic
+    
+    Args:
+        uri: Document URI
+        content: Document content (will be converted to appropriate format)
+        collection: Optional collection to add the document to
+    """
+    client = get_client()
+    try:
+        # Convert content to string if it's not already
+        if isinstance(content, (dict, list)):
+            data = json.dumps(content)
+        else:
+            data = str(content)
             
-            else:
-                raise ValueError(f"Unknown tool: {name}")
-
-        except Exception as e:
-            return [types.TextContent(type="text", text=f"Error: {str(e)}")]
-
-    async with mcp.server.stdio.stdio_server() as (read_stream, write_stream):
-        logger.info("Server running with stdio transport")
-        await server.run(
-            read_stream,
-            write_stream,
-            InitializationOptions(
-                server_name="marklogic",
-                server_version="0.1.0",
-                capabilities=server.get_capabilities(
-                    notification_options=NotificationOptions(),
-                    experimental_capabilities={},
-                ),
-            ),
+        headers = {"Content-Type": "application/json"}
+        if collection:
+            headers["ML-Collection"] = collection
+            
+        response = client.put(
+            f"/v1/documents?uri={uri}",
+            data=data,
+            headers=headers
         )
+        
+        if response.status_code == 201:
+            return f"Document created successfully at {uri}"
+        else:
+            return f"Error: Unexpected status code {response.status_code}"
+    except Exception as e:
+        return f"Error creating document: {str(e)}"
+
+@mcp.tool()
+def read_document(uri: str) -> str:
+    """Read a document from MarkLogic by URI"""
+    client = get_client()
+    try:
+        response = client.get(f"/v1/documents?uri={uri}")
+        if response.status_code == 200:
+            content = response.json() if response.headers.get("Content-Type") == "application/json" else response.text
+            return json.dumps(content, indent=2) if isinstance(content, dict) else str(content)
+        else:
+            return f"Error: Document not found or access denied (Status: {response.status_code})"
+    except Exception as e:
+        return f"Error reading document: {str(e)}"
+
+@mcp.tool()
+def update_document(uri: str, content: Union[Dict, str]) -> str:
+    """Update an existing document in MarkLogic
+    
+    Args:
+        uri: Document URI
+        content: New document content (JSON or string)
+    """
+    client = get_client()
+    try:
+        # Convert dict to JSON string if needed
+        if isinstance(content, dict):
+            content = json.dumps(content)
+            
+        response = client.put(
+            f"/v1/documents?uri={uri}",
+            data=content,
+            headers={"Content-Type": "application/json"}
+        )
+        
+        if response.status_code in [201, 204]:
+            return f"Document {uri} updated successfully"
+        else:
+            return f"Error: Unexpected status code {response.status_code}"
+    except Exception as e:
+        return f"Error updating document: {str(e)}"
+
+@mcp.tool()
+def delete_document(uri: str) -> str:
+    """Delete a document from MarkLogic by URI"""
+    client = get_client()
+    try:
+        response = client.delete(f"/v1/documents?uri={uri}")
+        if response.status_code == 204:
+            return f"Document {uri} deleted successfully"
+        else:
+            return f"Error: Unexpected status code {response.status_code}"
+    except Exception as e:
+        return f"Error deleting document: {str(e)}"
+
+@mcp.tool()
+def search_documents(query: str, collection: Optional[str] = None) -> str:
+    """Search for documents in MarkLogic
+    
+    Args:
+        query: Search query string
+        collection: Optional collection to search within
+    """
+    client = get_client()
+
+    try:
+        params = {
+            "q": query,
+            "pageLength": 100,
+            "format": "json"
+        }
+        if collection:
+            params["collection"] = collection
+
+        response = client.get("/v1/search", params=params)
+
+        if not response.content or not response.content.strip():
+            return "Error: Empty response from MarkLogic"
+
+        if response.status_code == 200:
+            try:
+                return json.dumps(response.json(), indent=2)
+            except json.JSONDecodeError as jde:
+                return f"Error: Invalid JSON in response — {str(jde)}\nRaw: {response.text}"
+        else:
+            return f"Error: Search failed with status code {response.status_code}, body: {response.text}"
+    except Exception as e:
+        return f"Error searching documents: {str(e)}"
+
+if __name__ == "__main__":
+    logging.info("Starting MarkLogic MCP server on http://localhost:8021")
+    mcp.run(host="localhost", port=8021)
