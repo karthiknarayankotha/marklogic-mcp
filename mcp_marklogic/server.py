@@ -156,5 +156,4 @@ def search_documents(query: str, collection: Optional[str] = None) -> str:
         return f"Error searching documents: {str(e)}"
 
 if __name__ == "__main__":
-    logging.info("Starting MarkLogic MCP server on http://localhost:8021")
-    mcp.run(host="localhost", port=8021)
+    mcp.run(transport="stdio")

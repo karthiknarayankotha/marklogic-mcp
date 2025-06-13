@@ -14,4 +14,7 @@ build-backend = "hatchling.build"
 dev-dependencies = ["pyright>=1.1.389", "pytest>=7.0.0", "pytest-asyncio>=0.20.3"]
 
 [project.scripts]
-mcp-marklogic = "mcp_marklogic:main"
+intruder-mcp = "mcp_marklogic.server:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["mcp_marklogic"] 

@@ -1,7 +1,5 @@
 import os
 import pytest
-import asyncio
-import json
 from mcp_marklogic.server import MarkLogicDatabase
 
 @pytest.fixture(scope="function")
